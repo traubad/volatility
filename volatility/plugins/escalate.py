@@ -78,8 +78,8 @@ class escalate(common.AbstractWindowsCommand):
 
         self._proc = self.get_target_proc(pid)
 
-        # self.perform_atack()
-        print self._proc.get_token().Privileges.Enabled
+        self.perform_atack()
+        # print self._proc.get_token().Privileges.Enabled
         # outfd.write("Pid: {}\n".format(pid))
         # outfd.write("Current context: {0} @ {1:#x}, pid={2}, ppid={3} DTB={4:#x}\n".format(self._proc.ImageFileName,
         #                                                                                  self._proc.obj_offset,

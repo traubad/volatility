@@ -58,3 +58,6 @@ nosetests.xml
 *.bin
 *.001
 *.raw
+
+#test_settings
+test_settings.py

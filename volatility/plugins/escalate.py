@@ -86,8 +86,8 @@ class escalate(common.AbstractWindowsCommand):
     def get_name_from_pid(self, pid):
         '''
         Gets the name of a process if pid is given
-        :param name: THe target process' name
-        :return: The target process' PID
+        :param name: THe target process' pid
+        :return: The target process' name
         '''
         for proc in win32.tasks.pslist(self._addrspace):
             if proc.UniqueProcessId.v() == pid:

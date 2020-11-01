@@ -104,8 +104,11 @@ class escalate(common.AbstractWindowsCommand):
         if pid is None:
             pid = self.get_pid_from_name(name)
 
-        elif name is None:
+        else:
+            if name is not None:
+                outfd("Name and PID were both supplied, disregarding name\n")
             name = self.get_name_from_pid(pid)
+
 
         self._proc = self.get_target_proc(pid)
 

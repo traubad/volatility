@@ -26,10 +26,10 @@ import volatility.plugins.linux.common as linux_common
 import volatility.plugins.linux.pslist as linux_pslist
 
 
-class escalate(linux_common.AbstractLinuxCommand):
+class escalate(linux_pslist.linux_pslist):
 
     def __init__(self, config, *args, **kwargs):
-        linux_common.AbstractLinuxCommand.__init__(self, config, *args, **kwargs)
+        linux_pslist.linux_pslist.__init__(self, config, *args, **kwargs)
 
         self._config.add_option('PID', short_option='i', type="int", default=None,
             help='ID of Process to Escalate', action='store')
@@ -42,42 +42,17 @@ class escalate(linux_common.AbstractLinuxCommand):
                             "\nescalate -n bash"))
 
     def get_pid_from_name(self, name):
-        print "{0:16} {1:6} {2:8}".format("Name", "PID", "Offset")
-        for proc in linux_pslist(self._config).allprocs():
-            print "{0:16} {1:<6} {2:#08x}".format(proc.comm, proc.pid, proc.obj_offset)
-            # if proc.comm == name:
-            #     return proc.pid
+        for proc in linux_pslist.linux_pslist(self._config).calculate():
+            if proc.comm == name:
+                return proc.pid
         else:
             raise(Exception("Bad Process name: {}".format(name)))
 
 
     def render_text(self, outfd, data):
-        print("hi!")
         pid = self._config.PID
 
         if pid is None:
             pid = self.get_pid_from_name(self._config.NAME)
 
-        outfd.write(pid)
-
-
-    def getpidlist(self):
-        return pslist.linux_pslist(self._config).allprocs()
-
-        # output = win32.tasks.pslist(self._addrspace)
-        # for eproc in win32.tasks.pslist(self._addrspace):
-        #     print "{0:16} {1:<6} {2:<6} {3:#08x}".format(eproc.ImageFileName,
-        #                                                eproc.UniqueProcessId.v(),
-        #                                                eproc.InheritedFromUniqueProcessId.v(),
-        #                                                eproc.obj_offset)
-    # #Borrowed this from PSTree
-    # @cache.CacheDecorator(lambda self: "tests/pstree/verbose={0}".format(self._config.VERBOSE))
-    # def calculate(self):
-    #
-    #     ## Load a new address space
-    #     addr_space = utils.load_as(self._config)
-    #
-    #     return dict(
-    #             (int(task.UniqueProcessId), task)
-    #             for task in tasks.pslist(addr_space)
-    #             )
+        outfd.write("Pid: {}".format(pid))

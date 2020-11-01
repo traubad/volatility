@@ -68,10 +68,10 @@ class escalate(common.AbstractWindowsCommand):
         self._addrspace = utils.load_as(self._config)
         pid = self._config.PID
 
-        self._proc = self.get_target_proc(pid)
+        if pid is None:
+            pid = self.get_pid_from_name(self._config.NAME)
 
-        # if pid is None:
-        #     pid = self.get_pid_from_name(self._config.NAME)
+        self._proc = self.get_target_proc(pid)
 
         # outfd.write("Pid: {}\n".format(pid))
         outfd.write("Current context: {0} @ {1:#x}, pid={2}, ppid={3} DTB={4:#x}\n".format(self._proc.ImageFileName,

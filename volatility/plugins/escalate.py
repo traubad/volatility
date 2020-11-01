@@ -106,7 +106,7 @@ class escalate(common.AbstractWindowsCommand):
 
         else:
             if name is not None:
-                outfd("Name and PID were both supplied, disregarding name\n")
+                outfd.write("Name and PID were both supplied, disregarding name\n")
             name = self.get_name_from_pid(pid)
 
 

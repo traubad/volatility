@@ -26,7 +26,7 @@
 
 import struct
 import sys
-import volatility.plugins.common as common 
+import volatility.plugins.common as common
 import volatility.win32 as win32
 import volatility.utils as utils
 import volatility.obj as obj
@@ -95,7 +95,7 @@ class volshell(common.AbstractWindowsCommand):
         else:
             print "{0:18} {1:18} {2}".format("Offset", "Base", "Name")
         for module in modules or self.getmodules():
-            print "{0:#08x} {1:#08x} {2}".format(module.obj_offset, 
+            print "{0:#08x} {1:#08x} {2}".format(module.obj_offset,
                                                  module.DllBase,
                                                  module.FullDllName or module.BaseDllName or '')
 
@@ -140,7 +140,7 @@ class volshell(common.AbstractWindowsCommand):
 
         self.context_display()
 
-    def render_text(self, _outfd, _data):
+    def render_text(self, _outfd, _data):        
         self._addrspace = utils.load_as(self._config)
 
         if not self._config.OFFSET is None:
@@ -152,8 +152,8 @@ class volshell(common.AbstractWindowsCommand):
             # FIXME: volshell is really not intended to switch into multiple
             # process contexts at once, so it doesn't make sense to use a csv
             # pid list. However, the linux and mac volshell call the respective
-            # linux_pslist and mac_pslist which require a csv pidlist. After 
-            # the 2.3 release we should close this along with issue 375. 
+            # linux_pslist and mac_pslist which require a csv pidlist. After
+            # the 2.3 release we should close this along with issue 375.
             pidlist = [int(p) for p in self._config.PID.split(',')]
             for p in pidlist:
                 self.set_context(pid = p)
@@ -181,11 +181,11 @@ class volshell(common.AbstractWindowsCommand):
 
         def db(address, length = 0x80, space = None):
             """Print bytes as canonical hexdump.
-            
+
             This function prints bytes at the given virtual address as a canonical
             hexdump. The address will be translated in the current process context
             (see help on cc for information on how to change contexts).
-            
+
             The length parameter (default: 0x80) specifies how many bytes to print,
             the width parameter (default: 16) allows you to change how many bytes per
             line should be displayed, and the space parameter allows you to
@@ -210,7 +210,7 @@ class volshell(common.AbstractWindowsCommand):
             a series of dwords (unsigned four-byte integers) in hexadecimal.
             The address will be translated in the current process context
             (see help on cc for information on how to change contexts).
-            
+
             The optional length parameter (default: 0x80) controls how many bytes
             to display, and space allows you to optionally specify the address space
             to read the data from.
@@ -244,7 +244,7 @@ class volshell(common.AbstractWindowsCommand):
             a series of qwords (unsigned eight-byte integers) in hexadecimal.
             The address will be translated in the current process context
             (see help on cc for information on how to change contexts).
-            
+
             The optional length parameter (default: 0x80) controls how many bytes
             to display, and space allows you to optionally specify the address space
             to read the data from.
@@ -252,7 +252,7 @@ class volshell(common.AbstractWindowsCommand):
             if not space:
                 space = self._proc.get_process_address_space()
 
-            # round up 
+            # round up
             if length % 8 != 0:
                 length = (length + 8) - (length % 8)
 
@@ -274,24 +274,24 @@ class volshell(common.AbstractWindowsCommand):
             self.ps()
 
         def addrspace():
-            """Get the current kernel/virtual address space. 
+            """Get the current kernel/virtual address space.
 
-            This returns the current address space. 
+            This returns the current address space.
             """
             return self._addrspace
 
         def proc():
             """Get the current process object.
-            
-            This returns the current process object. 
+
+            This returns the current process object.
             """
-            return self._proc 
+            return self._proc
 
         def getprocs():
             """Generator of process objects (scripting).
 
             This returns a list of active process objects.
-            """    
+            """
             return self.getpidlist()
 
         def getmods():
@@ -310,7 +310,7 @@ class volshell(common.AbstractWindowsCommand):
 
         def sc():
             """Show the current context.
-            
+
             Show the current process information.
             """
             self.context_display()
@@ -384,7 +384,7 @@ class volshell(common.AbstractWindowsCommand):
                         print "{0}".format("..." * depth), repr(objct), "({0} bytes)".format(size)
                         for o, m, t in sorted(membs):
                             print "{0}{1:6}: {2:30} {3}".format("..." * depth, hex(o), m, t)
-                            if recursive: 
+                            if recursive:
                                 if t[0] in profile.vtypes:
                                     dt(t[0], recursive = recursive, depth = depth + 1)
                 elif isinstance(objct, obj.BaseObject):
@@ -439,7 +439,7 @@ class volshell(common.AbstractWindowsCommand):
                 http://www.ragestorm.net/distorm/
 
             The mode is '16bit', '32bit' or '64bit'. If not supplied, the disasm
-            mode is taken from the profile. 
+            mode is taken from the profile.
             """
             if not sys.modules.has_key("distorm3"):
                 print "ERROR: Disassembly unavailable, distorm not found"
@@ -473,7 +473,7 @@ class volshell(common.AbstractWindowsCommand):
             count  - if True, displays a message reporting how many hits found; only really useful for max == 0
             length - output this many bytes for each hit
             """
-            
+
             if isinstance(needle, basestring):
                 needle = [ needle ]
             elif not isinstance(needle, (list, tuple)) or not all([isinstance(x, basestring) for x in needle]):

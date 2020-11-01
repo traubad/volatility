@@ -97,7 +97,7 @@ def command_help(command):
         if item.startswith("render_"):
             outputs.append(item.split("render_", 1)[-1])
     outputopts = "\nModule Output Options: " + \
-        "{0}\n".format("{0}".format("\n".join([", ".join(o for o in sorted(outputs))]))) 
+        "{0}\n".format("{0}".format("\n".join([", ".join(o for o in sorted(outputs))])))
 
     result = textwrap.dedent("""
     ---------------------------------

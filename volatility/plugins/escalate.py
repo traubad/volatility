@@ -39,8 +39,8 @@ class escalate(common.AbstractWindowsCommand):
 
         if self._config.PID is None and self._config.NAME is None:
             raise(Exception("Either a process id or a Process name is required e.g." +
-                            "\nescalate -i 1104" +
-                            "\nescalate -n cmd.exe"))
+                            "\nescalate -i 1104 --write" +
+                            "\nescalate -n cmd.exe --write"))
 
         self._addrspace = None
         self._proc = None
@@ -83,13 +83,33 @@ class escalate(common.AbstractWindowsCommand):
             raise(Exception("Bad Process name: {}".format(name)))
 
 
+    def get_name_from_pid(self, pid):
+        '''
+        Gets the name of a process if pid is given
+        :param name: THe target process' name
+        :return: The target process' PID
+        '''
+        for proc in win32.tasks.pslist(self._addrspace):
+            if proc.UniqueProcessId.v() == pid:
+                return str(proc.ImageFileName)
+        else:
+            raise(Exception("Bad PID: {}".format(pid)))
+
+
     def render_text(self, outfd, data):
         self._addrspace = utils.load_as(self._config)
         pid = self._config.PID
+        name = self._config.NAME
 
         if pid is None:
-            pid = self.get_pid_from_name(self._config.NAME)
+            pid = self.get_pid_from_name(name)
+
+        elif name is None:
+            name = self.get_name_from_pid(pid)
 
         self._proc = self.get_target_proc(pid)
 
         self.perform_atack()
+
+        outfd.write("{:20} {:10} {:35}\n".format("Name", "PID", "Result"))
+        outfd.write("{:20} {:10} {:35}\n".format(name, str(pid), "Privileges Escalated Successfully"))

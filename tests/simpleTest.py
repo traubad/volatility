@@ -11,6 +11,7 @@ def run_test():
     try:
         for run in runs:
             os.system('echo "Yes, I want to enable write support" | '+run)
+            os.system('echo "\n\n"')
 
     except Exception:
         print("Failure")

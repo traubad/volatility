@@ -42,6 +42,20 @@ class escalate(common.AbstractWindowsCommand):
                             "\nescalate -i 1104" +
                             "\nescalate -n cmd.exe"))
 
+        self._addrspace = None
+        self._proc = None
+
+    def get_target_proc(self, pid):
+        procs = win32.tasks.pslist(self._addrspace)
+
+        for proc in procs:
+            if proc.UniqueProcessId.v() == pid:
+                offset = proc.v()
+                break
+
+        return obj.Object("_EPROCESS", offset=offset, vm=self._addrspace)
+
+
     def get_pid_from_name(self, name):
         for proc in win32.tasks.pslist(self._addrspace):
             if str(proc.ImageFileName) == name:
@@ -54,7 +68,14 @@ class escalate(common.AbstractWindowsCommand):
         self._addrspace = utils.load_as(self._config)
         pid = self._config.PID
 
-        if pid is None:
-            pid = self.get_pid_from_name(self._config.NAME)
+        self._proc = self.get_target_proc(pid)
 
-        outfd.write("Pid: {}\n".format(pid))
+        # if pid is None:
+        #     pid = self.get_pid_from_name(self._config.NAME)
+
+        # outfd.write("Pid: {}\n".format(pid))
+        outfd.write("Current context: {0} @ {1:#x}, pid={2}, ppid={3} DTB={4:#x}\n".format(self._proc.ImageFileName,
+                                                                                         self._proc.obj_offset,
+                                                                                         self._proc.UniqueProcessId.v(),
+                                                                                         self._proc.InheritedFromUniqueProcessId.v(),
+                                                                                         self._proc.Pcb.DirectoryTableBase.v()).format(pid))

@@ -19,51 +19,50 @@
 # along with Volatility.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from volatility import renderers
-from volatility.renderers.basic import Address
-
-import volatility.win32.tasks as tasks
-import volatility.utils as utils
-import volatility.plugins.common as common
-import volatility.cache as cache
 import volatility.obj as obj
 import volatility.debug as debug
 
-import volatility.win32 as win32
+import volatility.plugins.linux.common as linux_common
+import volatility.plugins.linux.pslist as linux_pslist
 
-class escalate(common.AbstractWindowsCommand):
+
+class escalate(linux_common.AbstractLinuxCommand):
 
     def __init__(self, config, *args, **kwargs):
-        common.AbstractWindowsCommand.__init__(self, config, *args, **kwargs)
+        linux_common.AbstractLinuxCommand.__init__(self, config, *args, **kwargs)
 
         self._config.add_option('PID', short_option='i', type="int", default=None,
             help='ID of Process to Escalate', action='store')
 
-        self._config.add_option('NAME', short_option='n', type='str', default=None,
-            help='Name of Process to Escalate', action='store')
+        self._config.add_option('NAME', short_option='n', type='string', default=None, help='Name of Process to Escalate', action='store')
 
         if self._config.PID is None and self._config.NAME is None:
             raise(Exception("Either a process id or a Process name is required e.g." +
                             "\nescalate -i 1104" +
                             "\nescalate -n bash"))
 
-        self._addrspace = utils.load_as(self._config)
-
     def get_pid_from_name(self, name):
-        for eproc in win32.tasks.pslist(self._addrspace):
-            if eproc.ImageFileName == name:
-                return eproc.UniqueProcessId.v()
+        print "{0:16} {1:6} {2:8}".format("Name", "PID", "Offset")
+        for proc in linux_pslist(self._config).allprocs():
+            print "{0:16} {1:<6} {2:#08x}".format(proc.comm, proc.pid, proc.obj_offset)
+            # if proc.comm == name:
+            #     return proc.pid
         else:
             raise(Exception("Bad Process name: {}".format(name)))
 
 
     def render_text(self, outfd, data):
+        print("hi!")
         pid = self._config.PID
 
         if pid is None:
             pid = self.get_pid_from_name(self._config.NAME)
 
         outfd.write(pid)
+
+
+    def getpidlist(self):
+        return pslist.linux_pslist(self._config).allprocs()
 
         # output = win32.tasks.pslist(self._addrspace)
         # for eproc in win32.tasks.pslist(self._addrspace):

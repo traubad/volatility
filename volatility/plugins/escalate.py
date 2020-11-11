@@ -43,11 +43,11 @@ class escalate(common.AbstractWindowsCommand):
 
         if self._config.PID is None and self._config.NAME is None and not self._config.ALL:
             raise(Exception("Either a process id or a Process name is required e.g." +
-                            "\nescalate -i 1104 --write" +
-                            "\nescalate -i 1104,952 --write" +
-                            "\nescalate -n cmd.exe --write"+
-                            "\nescalate -n cmd.exe,explorer --write"+
-                            "\nescalate -a --write"))
+                            "\n\tescalate -i 1104 --write" +
+                            "\n\tescalate -i 1104,952 --write" +
+                            "\n\tescalate -n cmd.exe --write"+
+                            "\n\tescalate -n cmd.exe,explorer --write"+
+                            "\n\tescalate -a --write"))
 
         self._addrspace = None
         self._proc = None

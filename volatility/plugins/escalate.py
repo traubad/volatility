@@ -32,11 +32,11 @@ class escalate(common.AbstractWindowsCommand):
     def __init__(self, config, *args, **kwargs):
         common.AbstractWindowsCommand.__init__(self, config, *args, **kwargs)
 
-        self._config.add_option('PID', short_option='i', type="int", default=None,
-            help='ID of Process to Escalate', action='store')
+        self._config.add_option('PID', short_option='i', type="string", default=None,
+            help='ID of Process to Escalate, multiple pids can be separated with commas', action='store')
 
         self._config.add_option('NAME', short_option='n', type='string', default=None,
-            help='Name of Process to Escalate', action='store')
+            help='Name of Process to Escalate, multiple names can be separated with commas', action='store')
 
         self._config.add_option('ALL', short_option='a', action="store_true",
             help="Escalate all Processes", default=False)
@@ -44,7 +44,10 @@ class escalate(common.AbstractWindowsCommand):
         if self._config.PID is None and self._config.NAME is None and not self._config.ALL:
             raise(Exception("Either a process id or a Process name is required e.g." +
                             "\nescalate -i 1104 --write" +
-                            "\nescalate -n cmd.exe --write"))
+                            "\nescalate -i 1104,952 --write" +
+                            "\nescalate -n cmd.exe --write"+
+                            "\nescalate -n cmd.exe,explorer --write"+
+                            "\nescalate -a --write"))
 
         self._addrspace = None
         self._proc = None
@@ -61,6 +64,8 @@ class escalate(common.AbstractWindowsCommand):
             if proc.UniqueProcessId.v() == pid:
                 offset = proc.v()
                 break
+        else:
+            raise(Exception("PID not Found (Something is very wrong!)"))
 
         return obj.Object("_EPROCESS", offset=offset, vm=self._addrspace)
 
@@ -104,13 +109,14 @@ class escalate(common.AbstractWindowsCommand):
         self._addrspace = utils.load_as(self._config)
 
         if not self._config.ALL:
-            pid = [self._config.PID]
-            name = [self._config.NAME]
+            pid = self._config.PID.split(",") if self._config.PID is not None else [None]
+            name = self._config.NAME.split(",") if self._config.Name is not None else [None]
 
             if pid == [None]:
                 pid = [self.get_pid_from_name(n) for n in name]
 
             else:
+                pid = [int(p) for p in pid]
                 if name != [None]:
                     outfd.write("Name and PID were both supplied, disregarding name\n")
                 name = [self.get_name_from_pid(p) for p in pid]

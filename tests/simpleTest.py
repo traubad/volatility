@@ -7,6 +7,8 @@ def run_test():
             .format(test_settings.vol_path, test_settings.profile, test_settings.mem),
         "python2 {} --profile={} -f {} escalate -i 1812 --write"
             .format(test_settings.vol_path, test_settings.profile, test_settings.mem),
+        "python2 {} --profile={} -f {} escalate -a --write"
+            .format(test_settings.vol_path, test_settings.profile, test_settings.mem),
     )
     try:
         for run in runs:

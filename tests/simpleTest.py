@@ -18,6 +18,9 @@ def run_test():
         ["python2 {} --profile={} -f {} escalate -a --write"
             .format(test_settings.vol_path, test_settings.profile, test_settings.mem),
             "Check -a flag"],
+        ["python2 {} --profile={} -f {} escalate --write"
+            .format(test_settings.vol_path, test_settings.profile, test_settings.mem),
+            "Make sure error is thrown when no flags are used. EXCEPTION EXPECTED"],
     )
 
     print("")
@@ -26,12 +29,6 @@ def run_test():
         print("\t{}\n".format(text))
         os.system('echo "Yes, I want to enable write support" | '+run)
         print("\n{}\n".format("-"*75))
-
-    print("Final Test: confirm error on bad input (EXCEPTION EXPECTED)\n\n")
-    run = "python2 {} --profile={} -f {} escalate --write".format(
-        test_settings.vol_path, test_settings.profile, test_settings.mem
-    )
-    os.system('echo "Yes, I want to enable write support" | '+run)
 
 if __name__ == "__main__":
     run_test()

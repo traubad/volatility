@@ -27,7 +27,7 @@ def run_test():
         os.system('echo "Yes, I want to enable write support" | '+run)
         print("\n{}\n".format("-"*75))
 
-    print("Final Test, confirm error for bad input (ERROR EXPECTED)\n\n")
+    print("Final Test: confirm error on bad input (EXCEPTION EXPECTED)\n\n")
     run = "python2 {} --profile={} -f {} escalate --write".format(
         test_settings.vol_path, test_settings.profile, test_settings.mem
     )

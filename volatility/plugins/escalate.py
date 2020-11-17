@@ -39,15 +39,16 @@ class escalate(common.AbstractWindowsCommand):
             help='Name of Process to Escalate, multiple names can be separated with commas', action='store')
 
         self._config.add_option('PRIV', short_option='p', type='string', default='FFFFFFFFFFFFFFFF',
-            help='level to escalate privilege to', action='store')
+            help='hex value to set privilege', action='store')
 
         self._config.add_option('ALL', short_option='a', action="store_true",
             help="Escalate all Processes", default=False)
 
-        if self._config.PID is None and self._config.NAME is None and not self._config.ALL:
+        if self._config.PID is None and self._config.NAME is None and not self._config.ALL and not self._config.help:
             raise(Exception("Either a process id or a Process name is required e.g." +
                             "\n\tescalate -i 1104 --write" +
                             "\n\tescalate -i 1104,952 --write" +
+                            "\n\tescalate -i 1104 --write -p 00F00F00F00F000F" +
                             "\n\tescalate -n cmd.exe --write"+
                             "\n\tescalate -n cmd.exe,explorer --write"+
                             "\n\tescalate -a --write"))

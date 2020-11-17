@@ -26,7 +26,8 @@ def run_test():
     print("")
     for i, [run, text] in enumerate(runs):
         print("Test {}:".format(i+1))
-        print("\t{}\n".format(text))
+        print("\n{}".format(run))
+        print("\n\t{}\n".format(text))
         os.system('echo "Yes, I want to enable write support" | '+run)
         print("\n{}\n".format("-"*75))
 

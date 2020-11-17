@@ -135,8 +135,6 @@ class escalate(common.AbstractWindowsCommand):
 
         self.perform_atack()
 
-        new_priv = [proc.get_token().Privileges.Enabled for proc in self._proc]
-
         outfd.write("{:20} {:10} {:20} {:20}\n".format("Name", "PID", "Before", "After"))
-        for n, p, old_p, new_p in zip(name, pid, old_priv, new_priv):
-            outfd.write("{:20} {:10} {:20} {:20}\n".format(n, str(p), hex(old_p), hex(new_p)))
+        for n, p, old_p, new_p in zip(name, pid, old_priv, self._proc):
+            outfd.write("{:20} {:10} {:20} {:20}\n".format(n, str(p), hex(old_p), hex(new_p.get_token().Privileges.Enabled)))

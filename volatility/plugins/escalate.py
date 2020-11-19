@@ -134,7 +134,7 @@ class escalate(common.AbstractWindowsCommand):
             # Parse input names
             name = self._config.NAME.split(",") if self._config.Name is not None else [None]
 
-            
+
             if pid == [None]:
                 pid = [self.get_pid_from_name(n) for n in name]
 
@@ -159,6 +159,6 @@ class escalate(common.AbstractWindowsCommand):
         self.perform_atack()
 
         # Write output
-        outfd.write("{:20} {:10} {:20} {:20}\n".format("Name", "PID", "Before", "After"))
+        outfd.write("{:20} {:10} {:16}    {:16}\n".format("Name", "PID", "Before", "After"))
         for n, p, old_p, new_p in zip(name, pid, old_priv, self._proc):
-            outfd.write("{:20} {:10} {:20} {:20}\n".format(n, str(p), hex(old_p), hex(new_p.get_token().Privileges.Enabled)))
+            outfd.write("{:20} {:10} {:016X}    {:016X}\n".format(n, str(p), old_p, new_p.get_token().Privileges.Enabled))
